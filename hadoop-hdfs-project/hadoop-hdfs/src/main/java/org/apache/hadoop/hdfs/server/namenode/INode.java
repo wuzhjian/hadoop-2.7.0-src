@@ -48,6 +48,14 @@ import com.google.common.base.Preconditions;
  * We keep an in-memory representation of the file/block hierarchy.
  * This is a base INode class containing common fields for file and 
  * directory inodes.
+ *
+ * TODO
+ *  INode 这个设计理念，其实是hdf模仿Linux
+ *  如果是一个目录，那么类型就是INodeDirectory
+ *  如果是一个文件，就是一个INodeFile
+ *  在hdfs里面，INode是一个抽象类，这个抽象类有两个重要实现类：
+ *  1) INodeDirectory 目录
+ *  2) INodeFile 文件
  */
 @InterfaceAudience.Private
 public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {

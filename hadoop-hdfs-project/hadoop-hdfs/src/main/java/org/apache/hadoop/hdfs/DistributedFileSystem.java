@@ -1036,6 +1036,7 @@ public class DistributedFileSystem extends FileSystem {
     return mkdirsInternal(f, permission, true);
   }
 
+
   private boolean mkdirsInternal(Path f, final FsPermission permission,
       final boolean createParent) throws IOException {
     statistics.incrementWriteOps(1);
@@ -1044,6 +1045,7 @@ public class DistributedFileSystem extends FileSystem {
       @Override
       public Boolean doCall(final Path p)
           throws IOException, UnresolvedLinkException {
+        // TODO 重要代码
         return dfs.mkdirs(getPathName(p), permission, createParent);
       }
 
@@ -1056,6 +1058,8 @@ public class DistributedFileSystem extends FileSystem {
           throw new IOException("FileSystem does not support non-recursive"
               + "mkdir");
         }
+
+
         return fs.mkdirs(p, permission);
       }
     }.resolve(this, absF);

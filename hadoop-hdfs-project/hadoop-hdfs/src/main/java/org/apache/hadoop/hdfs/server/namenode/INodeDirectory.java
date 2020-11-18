@@ -69,6 +69,7 @@ public class INodeDirectory extends INodeWithAdditionalFields
   protected static final int DEFAULT_FILES_PER_DIRECTORY = 5;
   final static byte[] ROOT_NAME = DFSUtil.string2Bytes("");
 
+  // TODO 这里是一个主要属性，往这里面存子节点，可以是目录，也可以是文件
   private List<INode> children = null;
   
   /** constructor */
@@ -562,6 +563,8 @@ public class INodeDirectory extends INodeWithAdditionalFields
       children = new ArrayList<INode>(DEFAULT_FILES_PER_DIRECTORY);
     }
     node.setParent(this);
+
+    // TODO 子节点列表里面再添加一个node
     children.add(-insertionPoint - 1, node);
 
     if (node.getGroupName() == null) {

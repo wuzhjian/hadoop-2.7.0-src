@@ -665,6 +665,7 @@ public class DFSClient implements java.io.Closeable, RemotePeerFactory,
     
     if (proxyInfo != null) {
       this.dtService = proxyInfo.getDelegationTokenService();
+      // TODO 获取namenode
       this.namenode = proxyInfo.getProxy();
     } else if (rpcNamenode != null) {
       // This case is used for testing.
@@ -2971,7 +2972,9 @@ public class DFSClient implements java.io.Closeable, RemotePeerFactory,
     if (permission == null) {
       permission = FsPermission.getDefault();
     }
+    // TODO 权限检查类操作
     FsPermission masked = permission.applyUMask(dfsClientConf.uMask);
+    // TODO 重要
     return primitiveMkdir(src, masked, createParent);
   }
 
@@ -3002,6 +3005,7 @@ public class DFSClient implements java.io.Closeable, RemotePeerFactory,
     }
     TraceScope scope = Trace.startSpan("mkdir", traceSampler);
     try {
+      // TODO 走的hadoop RPC，调用服务端代码  namenode rpc server
       return namenode.mkdirs(src, absPermission, createParent);
     } catch(RemoteException re) {
       throw re.unwrapRemoteException(AccessControlException.class,

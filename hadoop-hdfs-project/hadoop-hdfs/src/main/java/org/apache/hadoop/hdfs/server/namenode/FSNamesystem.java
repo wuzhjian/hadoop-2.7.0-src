@@ -3873,7 +3873,9 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
     writeLock();
     try {
       checkOperation(OperationCategory.WRITE);
+      // TODO 如果是安全模式，创建不了目录
       checkNameNodeSafeMode("Cannot create directory " + src);
+      // TODO 创建目录
       auditStat = FSDirMkdirOp.mkdirs(this, src, permissions, createParent);
     } catch (AccessControlException e) {
       logAuditEvent(false, "mkdirs", src);

@@ -216,6 +216,8 @@ public class JournalSet implements JournalManager {
   @Override
   public EditLogOutputStream startLogSegment(final long txId,
       final int layoutVersion) throws IOException {
+
+    // TODO  闭包
     mapJournalsAndReportErrors(new JournalClosure() {
       @Override
       public void apply(JournalAndStream jas) throws IOException {
@@ -224,7 +226,7 @@ public class JournalSet implements JournalManager {
     }, "starting log segment " + txId);
     return new JournalSetOutputStream();
   }
-  
+
   @Override
   public void finalizeLogSegment(final long firstTxId, final long lastTxId)
       throws IOException {
@@ -388,8 +390,12 @@ public class JournalSet implements JournalManager {
       JournalClosure closure, String status) throws IOException{
 
     List<JournalAndStream> badJAS = Lists.newLinkedList();
+    // TODO journals 里我们知道有两个对象
+    // FIleJournalManager
+    // QuorumJouanlManager
     for (JournalAndStream jas : journals) {
       try {
+        // FIleJournalManager
         closure.apply(jas);
       } catch (Throwable t) {
         if (jas.isRequired()) {
@@ -589,6 +595,9 @@ public class JournalSet implements JournalManager {
   
   void add(JournalManager j, boolean required, boolean shared) {
     JournalAndStream jas = new JournalAndStream(j, required, shared);
+    // TODO 所以journals里面有两个对象
+    // FileJournalManager
+    // quorumJOurnalManager
     journals.add(jas);
   }
   

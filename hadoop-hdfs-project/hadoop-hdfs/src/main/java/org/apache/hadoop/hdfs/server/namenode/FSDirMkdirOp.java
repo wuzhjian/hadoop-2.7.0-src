@@ -43,7 +43,12 @@ class FSDirMkdirOp {
 
   static HdfsFileStatus mkdirs(FSNamesystem fsn, String src,
       PermissionStatus permissions, boolean createParent) throws IOException {
+
+    // TODO hdfs是如何管理目录树的， FSDirectory 就是目录树
+    // TODO hdfs dfs -ls /
     FSDirectory fsd = fsn.getFSDirectory();
+
+
     if(NameNode.stateChangeLog.isDebugEnabled()) {
       NameNode.stateChangeLog.debug("DIR* NameSystem.mkdirs: " + src);
     }
@@ -54,12 +59,17 @@ class FSDirMkdirOp {
     byte[][] pathComponents = FSDirectory.getPathComponentsForReservedPath(src);
     fsd.writeLock();
     try {
+
+      // TODO 解析要创建的目录路径  /user/hive/warehouse/data/mytable
       src = fsd.resolvePath(pc, src, pathComponents);
       INodesInPath iip = fsd.getINodesInPath4Write(src);
       if (fsd.isPermissionEnabled()) {
         fsd.checkTraverse(pc, iip);
       }
 
+      // TODO 找到最后一个Node， 比如我们这里已经存在的目录是/user/hive/warehouse
+      // 需要创建的目录是 /user/hive/warehouse/data/mytable
+      // 首先要找到最后一个INode，其实就是warehouse 这个INode
       final INode lastINode = iip.getLastINode();
       if (lastINode != null && lastINode.isFile()) {
         throw new FileAlreadyExistsException("Path is not a directory: " + src);
@@ -80,9 +90,15 @@ class FSDirMkdirOp {
         // create multiple inodes.
         fsn.checkFsObjectLimit();
 
+        // TODO
+        // 已存在：/user/hive/warehouse
+        // 要创建：/user/hive/warehouse/data/mytable
+        // 需要创建的目录: /data/mytable
         List<String> nonExisting = iip.getPath(existing.length(),
             iip.length() - existing.length());
         int length = nonExisting.size();
+
+        // TODO 需要创建多级目录
         if (length > 1) {
           List<String> ancestors = nonExisting.subList(0, length - 1);
           // Ensure that the user can traversal the path by adding implicit
@@ -93,7 +109,7 @@ class FSDirMkdirOp {
             throw new IOException("Failed to create directory: " + src);
           }
         }
-
+        // TODO 需要创建一个目录
         if ((existing = createChildrenDirectories(fsd, existing,
             nonExisting.subList(length - 1, length), permissions)) == null) {
           throw new IOException("Failed to create directory: " + src);
@@ -163,6 +179,9 @@ class FSDirMkdirOp {
     assert fsd.hasWriteLock();
 
     for (String component : children) {
+
+      // TODO 一个目录一个的去创建
+      // 如果我们只创建一个目录，就只运行一次
       existing = createSingleDirectory(fsd, existing, component, perm);
       if (existing == null) {
         return null;
@@ -188,6 +207,7 @@ class FSDirMkdirOp {
       INodesInPath existing, String localName, PermissionStatus perm)
       throws IOException {
     assert fsd.hasWriteLock();
+    // TODO 更新文件目录树，这棵目录树存在雨内存中，有FSNameSystem管理的
     existing = unprotectedMkdir(fsd, fsd.allocateNewInodeId(), existing,
         localName.getBytes(Charsets.UTF_8), perm, null, now());
     if (existing == null) {
@@ -200,6 +220,9 @@ class FSDirMkdirOp {
     NameNode.getNameNodeMetrics().incrFilesCreated();
 
     String cur = existing.getPath();
+
+    // TODO 把元数据信息记录到磁盘上(但一开始先写到内存)
+    // 往磁盘上面记录元数据日志
     fsd.getEditLog().logMkDir(cur, newNode);
     if (NameNode.stateChangeLog.isDebugEnabled()) {
       NameNode.stateChangeLog.debug("mkdirs: created directory " + cur);
@@ -234,6 +257,7 @@ class FSDirMkdirOp {
     final INodeDirectory dir = new INodeDirectory(inodeId, name, permission,
         timestamp);
 
+    // TODO 往文件目录树 该添加目录的地方添加节点
     INodesInPath iip = fsd.addLastINode(parent, dir, true);
     if (iip != null && aclEntries != null) {
       AclStorage.updateINodeAcl(dir, aclEntries, Snapshot.CURRENT_STATE_ID);

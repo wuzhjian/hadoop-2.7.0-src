@@ -96,6 +96,11 @@ import static org.apache.hadoop.util.Time.now;
  * happen entirely in memory. In contrast, FSNamesystem persists the operations
  * to the disk.
  * @see org.apache.hadoop.hdfs.server.namenode.FSNamesystem
+ *
+ * TODO FSDirectory 和 FSNamesystem 都是管理命名空间的状态(管理元数据)
+ *  1) FSDirectory 是一个直接在内存的数据结构，其实就是内存目录树
+ *  2) FSNamesystem 把我们的元数据记录信息持久化到磁盘上面(先写内存，再写到磁盘)
+ *
  **/
 @InterfaceAudience.Private
 public class FSDirectory implements Closeable {
@@ -129,6 +134,7 @@ public class FSDirectory implements Closeable {
   public final static byte[] DOT_INODES = 
       DFSUtil.string2Bytes(DOT_INODES_STRING);
 
+  // TODO 根目录
   INodeDirectory rootDir;
   private final FSNamesystem namesystem;
   private volatile boolean skipQuotaCheck = false; //skip while consuming edits
@@ -956,6 +962,8 @@ public class FSDirectory implements Closeable {
               + "existing file or directory to another name before upgrading "
               + "to the new release.");
     }
+
+    // TODO 获取父目录
     final INodeDirectory parent = existing.getINode(pos - 1).asDirectory();
     // The filesystem limits are not really quotas, so this check may appear
     // odd. It's because a rename operation deletes the src, tries to add
@@ -977,6 +985,7 @@ public class FSDirectory implements Closeable {
     boolean isRename = (inode.getParent() != null);
     boolean added;
     try {
+      // TODO 在父目录下面添加一个子节点
       added = parent.addChild(inode, true, existing.getLatestSnapshotId());
     } catch (QuotaExceededException e) {
       updateCountNoQuotaCheck(existing, pos, counts.negation());
