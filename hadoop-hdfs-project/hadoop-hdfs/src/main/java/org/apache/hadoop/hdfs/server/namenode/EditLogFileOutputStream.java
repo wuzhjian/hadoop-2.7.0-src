@@ -94,6 +94,8 @@ public class EditLogFileOutputStream extends EditLogOutputStream {
 
   @Override
   public void write(FSEditLogOp op) throws IOException {
+
+    // TODO 双缓冲
     doubleBuf.writeOp(op);
   }
 
@@ -201,6 +203,8 @@ public class EditLogFileOutputStream extends EditLogOutputStream {
       return;
     }
     preallocate(); // preallocate file if necessary
+
+    // TODO 刷写磁盘
     doubleBuf.flushTo(fp);
     if (durable && !shouldSkipFsyncForTests && !shouldSyncWritesAndSkipFsync) {
       fc.force(false); // metadata updates not needed

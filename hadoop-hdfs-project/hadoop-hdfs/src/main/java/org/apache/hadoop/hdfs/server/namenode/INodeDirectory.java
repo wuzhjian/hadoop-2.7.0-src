@@ -537,6 +537,8 @@ public class INodeDirectory extends INodeWithAdditionalFields
       }
       return sf.addChild(this, node, setModTime, latestSnapshotId);
     }
+
+    // TODO 添加子节点
     addChild(node, low);
     if (setModTime) {
       // update modification time of the parent directory

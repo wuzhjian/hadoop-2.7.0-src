@@ -101,9 +101,12 @@ class QuorumOutputStream extends EditLogOutputStream {
       byte[] data = bufToSend.getData();
       assert data.length == bufToSend.getLength();
 
+      // TODO 把数据写入到journalanode
       QuorumCall<AsyncLogger, Void> qcall = loggers.sendEdits(
           segmentTxId, firstTxToFlush,
           numReadyTxns, data);
+
+      // TODO 这是一个阻塞方法，等待写入到journalnode集群处理结果
       loggers.waitForWriteQuorum(qcall, writeTimeoutMs, "sendEdits");
       
       // Since we successfully wrote this batch, let the loggers know. Any future

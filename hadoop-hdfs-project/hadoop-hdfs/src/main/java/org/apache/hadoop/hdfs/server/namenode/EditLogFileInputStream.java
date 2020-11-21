@@ -138,9 +138,18 @@ public class EditLogFileInputStream extends EditLogInputStream {
     Preconditions.checkState(state == State.UNINIT);
     BufferedInputStream bin = null;
     try {
+      // 装饰模式
+      // TODO FStream
+      // TODO 这个log是URLlog，要找URLlog的getInputStream方法
       fStream = log.getInputStream();
+
+      // TODO bin
       bin = new BufferedInputStream(fStream);
+
+      // TODO tracker
       tracker = new FSEditLogLoader.PositionTrackingInputStream(bin);
+
+      // TODO dataIn
       dataIn = new DataInputStream(tracker);
       try {
         logVersion = readLogVersion(dataIn, verifyLayoutVersion);
@@ -158,6 +167,8 @@ public class EditLogFileInputStream extends EditLogInputStream {
               "flags from log");
         }
       }
+
+      // TODO 这里使用装饰模式
       reader = new FSEditLogOp.Reader(dataIn, tracker, logVersion);
       reader.setMaxOpSize(maxOpSize);
       state = State.OPEN;
@@ -189,6 +200,8 @@ public class EditLogFileInputStream extends EditLogInputStream {
     switch (state) {
     case UNINIT:
       try {
+
+        // TODO 核心方法
         init(true);
       } catch (Throwable e) {
         LOG.error("caught exception initializing " + this, e);
@@ -200,6 +213,7 @@ public class EditLogFileInputStream extends EditLogInputStream {
       Preconditions.checkState(state != State.UNINIT);
       return nextOpImpl(skipBrokenEdits);
     case OPEN:
+      // TODO 通过reader读取日志
       op = reader.readOp(skipBrokenEdits);
       if ((op != null) && (op.hasTransactionId())) {
         long txId = op.getTransactionId();
@@ -247,6 +261,8 @@ public class EditLogFileInputStream extends EditLogInputStream {
 
   @Override
   protected FSEditLogOp nextOp() throws IOException {
+
+    // TODO 重要
     return nextOpImpl(false);
   }
 
@@ -458,6 +474,13 @@ public class EditLogFileInputStream extends EditLogInputStream {
             public InputStream run() throws IOException {
               HttpURLConnection connection;
               try {
+                // TODO HttpURLConnection
+                // 如果这里发生的是http请求，读取Journalnode日志
+                // 说明Journalnode启动起来的时候一定会有一个JournalnodeHttpServer
+                // Namenode: NamenodeRpcServer  NameNodeHttpServer
+                // DataNode: RpcServver HttpServer
+                // JournalNode: JournalRpcServer  JpurnalnodeHttpserver
+                // TODO 创建了一个HttpURLConnection对象
                 connection = (HttpURLConnection)
                     connectionFactory.openConnection(url, isSpnegoEnabled);
               } catch (AuthenticationException e) {
@@ -483,7 +506,8 @@ public class EditLogFileInputStream extends EditLogInputStream {
                 throw new IOException(CONTENT_LENGTH + " header is not provided " +
                                       "by the server when trying to fetch " + url);
               }
-        
+
+              // TODO 通过这个对象获取到了输入流
               return connection.getInputStream();
             }
           });

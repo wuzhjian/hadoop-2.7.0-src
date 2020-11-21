@@ -810,6 +810,8 @@ public class FSImage implements Closeable {
    */
   public long loadEdits(Iterable<EditLogInputStream> editStreams,
       FSNamesystem target) throws IOException {
+
+    // TODO
     return loadEdits(editStreams, target, null, null);
   }
 
@@ -821,7 +823,8 @@ public class FSImage implements Closeable {
     prog.beginPhase(Phase.LOADING_EDITS);
     
     long prevLastAppliedTxId = lastAppliedTxId;  
-    try {    
+    try {
+      // TODO 构建FSEDitLogLoader
       FSEditLogLoader loader = new FSEditLogLoader(target, lastAppliedTxId);
       
       // Load latest edits
@@ -829,10 +832,12 @@ public class FSImage implements Closeable {
         LOG.info("Reading " + editIn + " expecting start txid #" +
               (lastAppliedTxId + 1));
         try {
+          // TODO 加载日志
           loader.loadFSEdits(editIn, lastAppliedTxId + 1, startOpt, recovery);
         } finally {
           // Update lastAppliedTxId even in case of error, since some ops may
           // have been successfully applied before the error.
+          // TODO 记录最后一个事务ID
           lastAppliedTxId = loader.getLastAppliedTxId();
         }
         // If we are in recovery mode, we may have skipped over some txids.
@@ -1099,6 +1104,7 @@ public class FSImage implements Closeable {
     }
     try {
       try {
+        // TODO
         saveFSImageInAllDirs(source, nnf, imageTxId, canceler);
         storage.writeAll();
       } finally {

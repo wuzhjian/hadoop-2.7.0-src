@@ -594,7 +594,7 @@ public class JournalSet implements JournalManager {
   }
   
   void add(JournalManager j, boolean required, boolean shared) {
-    JournalAndStream jas = new JournalAndStream(j, required, shared);
+    JournalAndStream jas = new  JournalAndStream(j, required, shared);
     // TODO 所以journals里面有两个对象
     // FileJournalManager
     // quorumJOurnalManager

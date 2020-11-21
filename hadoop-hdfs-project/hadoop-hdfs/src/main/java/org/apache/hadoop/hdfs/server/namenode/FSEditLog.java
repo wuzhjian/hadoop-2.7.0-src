@@ -269,16 +269,22 @@ public class FSEditLog implements LogsPurgeable {
     synchronized(journalSetLock) {
       journalSet = new JournalSet(minimumRedundantJournals);
 
+      // TODO core-site.xml   hdfs-site.xml
       for (URI u : dirs) {
         boolean required = FSNamesystem.getRequiredNamespaceEditsDirs(conf)
             .contains(u);
         if (u.getScheme().equals(NNStorage.LOCAL_URI_SCHEME)) {
           StorageDirectory sd = storage.getStorageDirectory(u);
           if (sd != null) {
+            // TODO 如果是本地文件系统，就会创建一个 FileJournalnodeManager对象
+            // 这个对象用来管理把元数据写入到namenode服务器的磁盘上  FileJournalnodeManager
             journalSet.add(new FileJournalManager(conf, sd, storage),
                 required, sharedEditsDirs.contains(u));
           }
         } else {
+          // TODO 如果不是本地文件系统会针对journalnode创建一个对象
+          // 这个对象是用来管理元数据写入journalnode
+          // TODO QuorumJournalManager
           journalSet.add(createJournal(u), required,
               sharedEditsDirs.contains(u));
         }
@@ -631,7 +637,7 @@ public class FSEditLog implements LogsPurgeable {
             if (journalSet.isEmpty()) {
               throw new IOException("No journals available to flush");
             }
-            // 交换内存缓冲
+            // TODO 交换内存缓冲
             editLogStream.setReadyToFlush();
           } catch (IOException e) {
             final String msg =

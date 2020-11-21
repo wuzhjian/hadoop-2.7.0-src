@@ -202,8 +202,11 @@ public class EditLogTailer {
     // deadlock.
     namesystem.writeLockInterruptibly();
     try {
+
+      // TODO 加载当前自己元数据日志
       FSImage image = namesystem.getFSImage();
 
+      // TODO StandByNamenode 获取当前的元数据日志的最后一条日志的事务ID是多少
       long lastTxnId = image.getLastAppliedTxId();
       
       if (LOG.isDebugEnabled()) {
@@ -229,6 +232,7 @@ public class EditLogTailer {
       // disk are ignored.
       long editsLoaded = 0;
       try {
+        // TODO 去Journalnode加载日志
         editsLoaded = image.loadEdits(streams, namesystem);
       } catch (EditLogInputException elie) {
         editsLoaded = elie.getNumEditsLoaded();
@@ -298,6 +302,7 @@ public class EditLogTailer {
           new PrivilegedAction<Object>() {
           @Override
           public Object run() {
+            // TODO 重要代码
             doWork();
             return null;
           }
@@ -328,6 +333,7 @@ public class EditLogTailer {
           // state updates.
           namesystem.cpLockInterruptibly();
           try {
+            // TODO 重要代码
             doTailEdits();
           } finally {
             namesystem.cpUnlock();
@@ -344,6 +350,7 @@ public class EditLogTailer {
         }
 
         try {
+          // TODO 每隔60秒 StandByNamenode去Journalnode获取一下日志
           Thread.sleep(sleepTimeMs);
         } catch (InterruptedException e) {
           LOG.warn("Edit log tailer interrupted", e);

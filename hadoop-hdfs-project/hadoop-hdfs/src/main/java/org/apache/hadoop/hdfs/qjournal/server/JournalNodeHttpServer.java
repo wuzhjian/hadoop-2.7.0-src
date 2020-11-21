@@ -64,8 +64,12 @@ public class JournalNodeHttpServer {
     httpServer = builder.build();
     httpServer.setAttribute(JN_ATTRIBUTE_KEY, localJournalNode);
     httpServer.setAttribute(JspHelper.CURRENT_CONF, conf);
+
+    // TODO 绑定了一个servlet
     httpServer.addInternalServlet("getJournal", "/getJournal",
         GetJournalEditServlet.class, true);
+
+    // TODO 启动服务
     httpServer.start();
   }
 

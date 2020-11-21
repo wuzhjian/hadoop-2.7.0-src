@@ -375,6 +375,8 @@ public class IPCLoggerChannel implements AsyncLogger {
     
     ListenableFuture<Void> ret = null;
     try {
+
+      // TODO 异步发送
       ret = singleThreadExecutor.submit(new Callable<Void>() {
         @Override
         public Void call() throws IOException {
@@ -382,6 +384,10 @@ public class IPCLoggerChannel implements AsyncLogger {
 
           long rpcSendTimeNanos = System.nanoTime();
           try {
+            // TODO 获取一个代理
+            // 这个是RPC的调用
+            // TODO journalnode 一定起什么服务
+            // JournalRpcServer
             getProxy().journal(createReqInfo(),
                 segmentTxId, firstTxnId, numTxns, data);
           } catch (IOException e) {

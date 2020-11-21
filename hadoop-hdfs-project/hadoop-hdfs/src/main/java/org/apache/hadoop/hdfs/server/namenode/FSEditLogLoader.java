@@ -140,6 +140,8 @@ public class FSEditLogLoader {
     try {
       long startTime = monotonicNow();
       FSImage.LOG.info("Start loading edits file " + edits.getName());
+
+      // TODO 重要代码
       long numEdits = loadEditRecords(edits, false, expectedStartingTxId,
           startOpt, recovery);
       FSImage.LOG.info("Edits file " + edits.getName() 
@@ -185,8 +187,11 @@ public class FSEditLogLoader {
     try {
       while (true) {
         try {
+
+          // TODO 用面向对象的思想，把一条元数据看做一个对象
           FSEditLogOp op;
           try {
+            // TODO 读取元数据日志 到了Journalnode
             op = in.readOp();
             if (op == null) {
               break;
@@ -231,6 +236,8 @@ public class FSEditLogLoader {
               LOG.trace("op=" + op + ", startOpt=" + startOpt
                   + ", numEdits=" + numEdits + ", totalEdits=" + totalEdits);
             }
+
+            // TODO 把获取到的元素就作用到自己的元数据里
             long inodeId = applyEditLogOp(op, fsDir, startOpt,
                 in.getVersion(true), lastInodeId);
             if (lastInodeId < inodeId) {
@@ -566,9 +573,12 @@ public class FSEditLogLoader {
       break;
     }
     case OP_MKDIR: {
+      // TODO 根据匹配规则，我们这次的日志应该是一个创建目录的日志
       MkdirOp mkdirOp = (MkdirOp)op;
       inodeId = getAndUpdateLastInodeId(mkdirOp.inodeId, logVersion,
           lastInodeId);
+
+      // TODO 把数据作用于自己的元数据里面
       FSDirMkdirOp.mkdirForEditLog(fsDir, inodeId,
           renameReservedPathsOnUpgrade(mkdirOp.path, logVersion),
           mkdirOp.permissions, mkdirOp.aclEntries, mkdirOp.timestamp);

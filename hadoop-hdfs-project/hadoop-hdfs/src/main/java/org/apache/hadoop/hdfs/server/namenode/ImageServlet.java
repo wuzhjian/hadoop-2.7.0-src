@@ -439,6 +439,13 @@ public class ImageServlet extends HttpServlet {
     return params;
   }
 
+  /**
+   * 核心方法
+   * @param request
+   * @param response
+   * @throws ServletException
+   * @throws IOException
+   */
   @Override
   protected void doPut(final HttpServletRequest request,
       final HttpServletResponse response) throws ServletException, IOException {
@@ -480,14 +487,20 @@ public class ImageServlet extends HttpServlet {
                           + "checkpoint for txid " + txid);
                   return null;
                 }
-
+                // TODO 步骤一：
+                //  针对请求获取一个输入流，不断把数据读取过来
                 InputStream stream = request.getInputStream();
                 try {
                   long start = monotonicNow();
+
+                  // TODO 步骤二：
                   MD5Hash downloadImageDigest = TransferFsImage
                       .handleUploadImageRequest(request, txid,
                           nnImage.getStorage(), stream,
                           parsedParams.getFileSize(), getThrottler(conf));
+
+                  // TODO 步骤三：
+                  //  会把接受过来的元数据，替换 现在已有的fsimage文件，对文件进行重命名
                   nnImage.saveDigestAndRenameCheckpointImage(nnf, txid,
                       downloadImageDigest);
                   // Metrics non-null only when used inside name node

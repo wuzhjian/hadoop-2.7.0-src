@@ -182,6 +182,7 @@ public class StandbyCheckpointer {
       } else {
         imageType = NameNodeFile.IMAGE;
       }
+      // TODO 把元数据持久化到磁盘上面
       img.saveNamespace(namesystem, imageType, canceler);
       txid = img.getStorage().getMostRecentCheckpointTxId();
       assert txid == thisCheckpointTxId : "expected to save checkpoint at txid=" +
@@ -199,11 +200,14 @@ public class StandbyCheckpointer {
     // Upload the saved checkpoint back to the active
     // Do this in a separate thread to avoid blocking transition to active
     // See HDFS-4816
+    // TODO 开启了一个异步线程
     ExecutorService executor =
         Executors.newSingleThreadExecutor(uploadThreadFactory);
     Future<Void> upload = executor.submit(new Callable<Void>() {
       @Override
       public Void call() throws IOException {
+
+        // TODO 这个操作要把刚刚从内存里面的元数据持久化到磁盘上面的那份数据上传到active的namenode上面去
         TransferFsImage.uploadImageFromStorage(activeNNAddress, conf,
             namesystem.getFSImage().getStorage(), imageType, txid, canceler);
         return null;
@@ -277,6 +281,7 @@ public class StandbyCheckpointer {
           new PrivilegedAction<Object>() {
           @Override
           public Object run() {
+            // TODO 重要方法
             doWork();
             return null;
           }
@@ -306,6 +311,8 @@ public class StandbyCheckpointer {
         boolean needRollbackCheckpoint = namesystem.isNeedRollbackFsImage();
         if (!needRollbackCheckpoint) {
           try {
+
+            // TODO 每隔60秒检查下是否需要做checkpoint
             Thread.sleep(checkPeriod);
           } catch (InterruptedException ie) {
           }
@@ -320,18 +327,27 @@ public class StandbyCheckpointer {
           }
           
           final long now = monotonicNow();
+
+          // TODO checkpoint 条件一 数量N
+          // 上一次checkpoint，现在最新数据差多少条数据
           final long uncheckpointed = countUncheckpointedTxns();
+
+          // TODO checkpoint 条件二
+          // 当前时间 - 上一次checkpoint的时间
+          // 已经多久没有checkpoint了
           final long secsSinceLast = (now - lastCheckpointTime) / 1000;
           
           boolean needCheckpoint = needRollbackCheckpoint;
           if (needCheckpoint) {
             LOG.info("Triggering a rollback fsimage for rolling upgrade.");
+            // TODO 条件一： 如果超过100万条日志没有做checkpoint，那么就需要做一次
           } else if (uncheckpointed >= checkpointConf.getTxnCount()) {
             LOG.info("Triggering checkpoint because there have been " + 
                 uncheckpointed + " txns since the last checkpoint, which " +
                 "exceeds the configured threshold " +
                 checkpointConf.getTxnCount());
             needCheckpoint = true;
+            // TODO 条件二： 如果超过一个小时没有做checkpoint，那么就需要做一次
           } else if (secsSinceLast >= checkpointConf.getPeriod()) {
             LOG.info("Triggering checkpoint because it has been " +
                 secsSinceLast + " seconds since the last checkpoint, which " +
@@ -348,8 +364,10 @@ public class StandbyCheckpointer {
             assert canceler == null;
             canceler = new Canceler();
           }
-          
+
+          // TODO 满足条件
           if (needCheckpoint) {
+            // TODO 执行checkpoint
             doCheckpoint();
             // reset needRollbackCheckpoint to false only when we finish a ckpt
             // for rollback image

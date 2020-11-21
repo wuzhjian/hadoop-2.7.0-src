@@ -82,6 +82,7 @@ public abstract class EditLogInputStream implements Closeable {
       cachedOp = null;
       return ret;
     }
+    // TODO 重要
     return nextOp();
   }
   

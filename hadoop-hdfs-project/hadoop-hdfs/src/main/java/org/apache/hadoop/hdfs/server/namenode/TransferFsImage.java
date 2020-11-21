@@ -216,9 +216,12 @@ public class TransferFsImage {
   public static void uploadImageFromStorage(URL fsName, Configuration conf,
       NNStorage storage, NameNodeFile nnf, long txid, Canceler canceler)
       throws IOException {
+
+    // TODO
     URL url = new URL(fsName, ImageServlet.PATH_SPEC);
     long startTime = Time.monotonicNow();
     try {
+      // TODO 做一个上传image操作
       uploadImage(url, conf, storage, nnf, txid, canceler);
     } catch (HttpPutFailedException e) {
       if (e.getResponseCode() == HttpServletResponse.SC_CONFLICT) {
@@ -266,6 +269,7 @@ public class TransferFsImage {
       connection = (HttpURLConnection) connectionFactory.openConnection(
           urlWithParams, UserGroupInformation.isSecurityEnabled());
       // Set the request to PUT
+      // TODO 发送put请求
       connection.setRequestMethod("PUT");
       connection.setDoOutput(true);
 
@@ -287,6 +291,7 @@ public class TransferFsImage {
       ImageServlet.setVerificationHeadersForPut(connection, imageFile);
 
       // Write the file to output stream.
+      // TODO
       writeFileToPutRequest(conf, connection, imageFile, canceler);
 
       int responseCode = connection.getResponseCode();
@@ -312,9 +317,15 @@ public class TransferFsImage {
       throws FileNotFoundException, IOException {
     connection.setRequestProperty(CONTENT_TYPE, "application/octet-stream");
     connection.setRequestProperty(CONTENT_TRANSFER_ENCODING, "binary");
+
+    // TODO 通过http获取流
     OutputStream output = connection.getOutputStream();
+
+    // TODO 不断读取自己的数据
     FileInputStream input = new FileInputStream(imageFile);
     try {
+
+      // TODO 流对拷，把数据写到output
       copyFileToStream(output, imageFile, input,
           ImageServlet.getThrottler(conf), canceler);
     } finally {

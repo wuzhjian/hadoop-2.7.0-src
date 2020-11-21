@@ -199,6 +199,8 @@ class FSDirMkdirOp {
     final byte[] localName = iip.getLastLocalName();
     final INodesInPath existing = iip.getParentINodesInPath();
     Preconditions.checkState(existing.getLastINode() != null);
+
+    // TODO 重要代码
     unprotectedMkdir(fsd, inodeId, existing, localName, permissions, aclEntries,
         timestamp);
   }
@@ -254,6 +256,8 @@ class FSDirMkdirOp {
       throw new FileAlreadyExistsException("Parent path is not a directory: " +
           parent.getPath() + " " + DFSUtil.bytes2String(name));
     }
+
+    // TODO 封装成一个目录
     final INodeDirectory dir = new INodeDirectory(inodeId, name, permission,
         timestamp);
 
